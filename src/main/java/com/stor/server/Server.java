@@ -1,5 +1,7 @@
 package com.stor.server;
 
+import com.stor.p2p.IStorApplication;
+import com.stor.p2p.StorApplication;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -13,6 +15,9 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import rice.environment.Environment;
+
+import java.util.logging.Logger;
 
 /**
  * User: rayje
@@ -21,11 +26,32 @@ import io.netty.handler.logging.LoggingHandler;
  */
 public class Server {
 
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
+
     private final int port;
 
-    public static void main(String[] args) throws Exception {
-        int port = 15080;
+    private static IStorApplication application;
+    public static IStorApplication getApplication() {
+        return Server.application;
+    }
 
+    public static void main(String[] args) throws Exception {
+
+        if(args.length != 1) {
+            System.out.println("Usage: COMMAND <PASTRY_PORT_NUM>");
+            System.exit(0);
+        }
+
+        Environment environment = new Environment();
+        environment.getParameters().setString("nat_search_policy", "never");
+
+        int port = 15080;
+        int bindPort = Integer.parseInt(args[0]);
+
+        //intialize the Application before accepting client commands
+        Server.application = new StorApplication(bindPort, environment);
+
+        //init server
         new Server(port).run();
     }
 

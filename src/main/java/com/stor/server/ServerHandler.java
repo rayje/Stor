@@ -4,6 +4,7 @@ import com.stor.commands.Command;
 import com.stor.commands.CommandResult;
 import com.stor.commands.Result;
 import com.stor.commands.ResultType;
+import com.stor.p2p.IStorApplication;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -22,6 +23,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object command) throws Exception {
         logger.log(Level.INFO, "CommandType: " + ((Command) command).getType());
+
+        //using the application, handle the command appropriately
+        IStorApplication application = Server.getApplication();
 
         Result result = new CommandResult(ResultType.SUCCESS);
         final ChannelFuture f = ctx.writeAndFlush(result);
