@@ -39,7 +39,7 @@ public class Server {
 
         if(args.length != 1) {
             System.out.println("Usage: COMMAND <PASTRY_PORT_NUM>");
-            System.exit(0);
+            System.exit(1);
         }
 
         Environment environment = new Environment();
