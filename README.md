@@ -5,7 +5,7 @@ A P2P Storage prototype
 
 ## Building the app
 
-The Stor application uses Maven to compile and package the application. The 'build' script is provided to assist in
+The Stor application uses Maven to compile and package the application. The <code>build</code> script is provided to assist in
 compiling and packaging the Stor application.
 
 ### Dependencies
