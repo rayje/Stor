@@ -20,12 +20,16 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = Logger.getLogger(ServerHandler.class.getName());
 
+    private IStorApplication application;
+
+    public ServerHandler(IStorApplication application)
+    {
+        this.application = application;
+    }
+
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object command) throws Exception {
         logger.log(Level.INFO, "CommandType: " + ((Command) command).getType());
-
-        //using the application, handle the command appropriately
-        IStorApplication application = Server.getApplication();
 
         Result result = new CommandResult(ResultType.SUCCESS);
         final ChannelFuture f = ctx.writeAndFlush(result);

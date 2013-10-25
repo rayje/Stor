@@ -29,11 +29,7 @@ public class Server {
     private static final Logger logger = Logger.getLogger(Server.class.getName());
 
     private final int port;
-
-    private static IStorApplication application;
-    public static IStorApplication getApplication() {
-        return Server.application;
-    }
+    private IStorApplication application;
 
     public static void main(String[] args) throws Exception {
 
@@ -49,14 +45,15 @@ public class Server {
         int bindPort = Integer.parseInt(args[0]);
 
         //intialize the Application before accepting client commands
-        Server.application = new StorApplication(bindPort, environment);
+        IStorApplication application = new StorApplication(bindPort, environment);
 
         //init server
-        new Server(port).run();
+        new Server(port, application).run();
     }
 
-    public Server(int port) {
+    public Server(int port, IStorApplication application) {
         this.port = port;
+        this.application = application;
     }
 
     public void run() throws Exception {
@@ -76,7 +73,7 @@ public class Server {
                         socketChannel.pipeline().addLast(
                                 new ObjectEncoder(),
                                 new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                new ServerHandler());
+                                new ServerHandler(application));
                     }
                 });
 

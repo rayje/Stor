@@ -1,8 +1,11 @@
 package com.stor.p2p;
 
+import com.stor.common.FileUtils;
+import rice.Continuation;
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.past.Past;
+import rice.p2p.past.PastContent;
 import rice.p2p.past.PastImpl;
 import rice.pastry.PastryNode;
 import rice.pastry.PastryNodeFactory;
@@ -14,10 +17,11 @@ import rice.persistence.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class StorApplication implements IStorApplication
-{
+public class StorApplication implements IStorApplication {
     private static final Logger logger = Logger.getLogger(StorApplication.class.getName());
 
     //stor port
@@ -30,6 +34,7 @@ public class StorApplication implements IStorApplication
     private static final int MAX_MEMORY_CACHE_CAPACITY = 5 * 1024 * 1024;
     private PastryNode node;
     private Past pastApp;
+    private PastryIdFactory messageIdFactory;
 
     public StorApplication(int bindPort, final Environment environment) throws IOException, InterruptedException {
         logger.info("StorApplication - begin initialization");
@@ -43,7 +48,7 @@ public class StorApplication implements IStorApplication
         node = pastryNodeFactory.newNode();
 
         //this id generator is used for creating ids for messages
-        PastryIdFactory messageIdFactory = new PastryIdFactory(node.getEnvironment());
+        messageIdFactory = new PastryIdFactory(node.getEnvironment());
 
         //storage
         Storage diskStorage = new PersistentStorage(messageIdFactory, DEFAULT_DISK_STORAGE_DIR, MAX_DISK_STORAGE_CAPACITY, node.getEnvironment());
@@ -58,14 +63,15 @@ public class StorApplication implements IStorApplication
 
         // the node may require sending several messages to fully boot into the ring
         synchronized (node) {
-            while (!node.isReady() && !node.joinFailed()) {
-                // delay so we don't busy-wait
-                node.wait(500);
-
+            while (!node.isReady()) {
                 // abort if can't join
                 if (node.joinFailed()) {
                     throw new IOException("Could not join the FreePastry ring.  Reason:" + node.joinFailedReason());
                 }
+
+                // delay so we don't busy-wait
+                node.wait(500);
+
             }
         }
 
@@ -74,11 +80,66 @@ public class StorApplication implements IStorApplication
 
     public Id put(String filePath) {
         logger.info("put");
-        return null;
+
+        byte[] fileContent = FileUtils.getFileData(filePath);
+        if (fileContent == null) {
+            //failed to fetch file content to store on the network
+            logger.warning("Failed to put fileContent.");
+            return null;
+        } else {
+            Id id = messageIdFactory.buildId(fileContent);
+
+            //save message
+            StorMessage message = new StorMessage(id, fileContent);
+            pastApp.insert(message, new Continuation<Boolean[], Exception>() {
+                @Override
+                public void receiveResult(Boolean[] results) {
+                    logger.log(Level.INFO, String.format("insert.receiveResult returned {1} results", results.length));
+                }
+
+                @Override
+                public void receiveException(Exception e) {
+                    logger.log(Level.WARNING, "insert.receiveException", e);
+                }
+            });
+
+            logger.warning(String.format("Attempting to put fileContent - {0}", id));
+            return id;
+        }
     }
 
-    public String get(Id fileId) {
+    public String get(Id contentId) {
         logger.info("get");
+
+        pastApp.lookup(contentId, new Continuation<PastContent, Exception>() {
+            @Override
+            public void receiveResult(PastContent pastContent) {
+                if (pastContent == null) {
+                    logger.warning("Unable to locate content");
+                } else if (pastContent instanceof StorMessage) {
+                    logger.info("StorMessage found... save and return file location");
+                    StorMessage message = (StorMessage) pastContent;
+                    Path newFilePath = FileUtils.putFileData(message.fileContent);
+                    if (newFilePath == null) {
+                        logger.info("Valid message received. File save FAILED.");
+//                        todo: how do i return from this
+//                        return null;
+                    } else {
+                        logger.info("Valid message received. File save SUCCESSFUL.");
+//                        return newFilePath.toString();
+                    }
+                } else {
+                    logger.info("Unknown message received.");
+                }
+            }
+
+            @Override
+            public void receiveException(Exception e) {
+                logger.log(Level.WARNING, "Exception during lookup", e);
+            }
+        });
+
+        //todo: return the value of the filePath where the data is actually stored
         return null;
     }
 }
