@@ -1,5 +1,7 @@
 package com.stor.commands;
 
+import rice.p2p.commonapi.Id;
+
 /**
  * User: rayje
  * Date: 10/14/13
@@ -9,14 +11,14 @@ public class GetCommand implements Command {
 
     private final CommandType type = CommandType.GET;
 
-    private final String fileName;
+    private final Id fileId;
 
-    public GetCommand(String fileName) {
-        this.fileName = fileName;
+    public GetCommand(Id fileId) {
+        this.fileId = fileId;
     }
 
-    public String getFileName() {
-        return fileName;
+    public Id getId() {
+        return fileId;
     }
 
     @Override

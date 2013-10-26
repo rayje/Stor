@@ -7,7 +7,7 @@ import java.io.Serializable;
  * Date: 10/14/13
  * Time: 9:47 PM
  */
-public class CommandResult implements Result, Serializable {
+public abstract class CommandResult implements Result, Serializable {
 
     private final ResultType type;
 
@@ -16,7 +16,7 @@ public class CommandResult implements Result, Serializable {
     }
 
     @Override
-    public ResultType getResult() {
+    public ResultType getResultType() {
         return type;
     }
 }

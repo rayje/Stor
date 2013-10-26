@@ -44,7 +44,7 @@ public class StorApplication implements IStorApplication {
         InetSocketAddress thisHostSocket = new InetSocketAddress(address, STOR_PORT);
 
         //generate a random node id
-        PastryNodeFactory pastryNodeFactory = new SocketPastryNodeFactory(new RandomNodeIdFactory(environment), STOR_PORT, environment);
+        PastryNodeFactory pastryNodeFactory = new SocketPastryNodeFactory(new RandomNodeIdFactory(environment), bindPort, environment);
         node = pastryNodeFactory.newNode();
 
         //this id generator is used for creating ids for messages
@@ -94,7 +94,7 @@ public class StorApplication implements IStorApplication {
             pastApp.insert(message, new Continuation<Boolean[], Exception>() {
                 @Override
                 public void receiveResult(Boolean[] results) {
-                    logger.log(Level.INFO, String.format("insert.receiveResult returned {1} results", results.length));
+                    logger.log(Level.INFO, "insert.receiveResult returned {0} results", results.length);
                 }
 
                 @Override
@@ -103,7 +103,7 @@ public class StorApplication implements IStorApplication {
                 }
             });
 
-            logger.warning(String.format("Attempting to put fileContent - {0}", id));
+            logger.log(Level.INFO, "Attempting to put fileContent - {0}", id);
             return id;
         }
     }

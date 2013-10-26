@@ -7,6 +7,5 @@ package com.stor.commands;
  */
 public interface Result {
 
-    ResultType getResult();
-
+    ResultType getResultType();
 }

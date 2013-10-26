@@ -24,6 +24,7 @@ public class FileUtils {
     public static byte[] getFileData(String filePath) {
         try {
             Path path = Paths.get(filePath);
+            logger.info("getFileData attempt to read content from: " + path.toAbsolutePath());
             return Files.readAllBytes(path);
         } catch (Exception ex) {
             logger.log(Level.WARNING, "Exception", ex);
@@ -33,7 +34,7 @@ public class FileUtils {
 
     /**
      * Stores provided byte[] into a temporary file
-     * @param fileData
+     * @param fileData byte content fo the file
      * @return Path
      *
      * null indicates failure
@@ -43,6 +44,7 @@ public class FileUtils {
         try
         {
             Path tempFile = Files.createTempFile("putFileData_", null, ownerReadWriteAttributes);
+            logger.info("putFileData attempt to write content to: " + tempFile.toAbsolutePath());
             Files.write(tempFile, fileData, StandardOpenOption.CREATE);
             return tempFile;
         }

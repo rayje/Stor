@@ -1,14 +1,12 @@
 package com.stor.server;
 
-import com.stor.commands.Command;
-import com.stor.commands.CommandResult;
-import com.stor.commands.Result;
-import com.stor.commands.ResultType;
+import com.stor.commands.*;
 import com.stor.p2p.IStorApplication;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import rice.p2p.commonapi.Id;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,16 +20,32 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private IStorApplication application;
 
-    public ServerHandler(IStorApplication application)
-    {
+    public ServerHandler(IStorApplication application) {
         this.application = application;
     }
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object command) throws Exception {
-        logger.log(Level.INFO, "CommandType: " + ((Command) command).getType());
+        CommandResult result;
 
-        Result result = new CommandResult(ResultType.SUCCESS);
+        switch (((Command)command).getType()) {
+            case GET:
+                GetCommand getCommand = (GetCommand) command;
+                logger.log(Level.INFO, "Server received GET command" + getCommand);
+                String filePath = application.get(getCommand.getId());
+                result = new GetCommandResult(ResultType.FAILURE, filePath);
+                break;
+            case PUT:
+                logger.log(Level.INFO, "Server received PUT command");
+                PutCommand putCommand = (PutCommand) command;
+                Id fileId = application.put(putCommand.getFileName());
+                result = new PutCommandResult(ResultType.FAILURE, fileId);
+                break;
+            default:
+                result = null;
+                logger.log(Level.INFO, "Unsupported command: " + ((Command)command).getType());
+        }
+
         final ChannelFuture f = ctx.writeAndFlush(result);
         f.addListener(new ChannelFutureListener() {
             @Override
