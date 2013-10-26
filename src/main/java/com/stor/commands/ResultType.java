@@ -1,9 +1,16 @@
 package com.stor.commands;
 
 /**
- * User: rayje
- * Date: 10/14/13
- * Time: 9:46 PM
+ * An enum used to describe the Result implementation
+ * for a given Result class.
+ *
+ * The ResultType is used to identify the type of Result given
+ * without requiring techniques such as reflection to identify
+ * a specific implementation class.
+ *
+ * The ResultType can be used to quickly identify a success or
+ * failure without requiring the need to analyze the content of
+ * the concrete result.
  */
 public enum ResultType {
 
