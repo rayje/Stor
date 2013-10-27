@@ -73,7 +73,7 @@ public class StorApplication implements IStorApplication {
     }
 
     public String put(String filePath) {
-        logger.info("put");
+        logger.info("StorApplication - put");
 
         byte[] fileContent = FileUtils.getFileData(filePath);
         if (fileContent == null) {
@@ -105,55 +105,55 @@ public class StorApplication implements IStorApplication {
     }
 
     public String get(String fileId) {
-        logger.info("get");
+        logger.info("StorApplication - get");
 
-        //given the fileId (which
+        //generate a pastry content id from the given file id
         Id contentId = messageIdFactory.buildIdFromToString(fileId);
 
+        /**
+         * Continuation to use for handling lookup response. We will be using an ExternalContinuation type because it
+         * permits us to sleep until content is ready to process
+         */
+        Continuation.ExternalContinuation<PastContent, Exception> getContinuation = new Continuation.ExternalContinuation<PastContent, Exception>();
+
         //trigger past lookup
-        pastApp.lookup(contentId,
-                new Continuation<PastContent, Exception>() {
-                    private Path newFilePath;
+        pastApp.lookup(contentId, getContinuation);
 
-                    public String getFilePath() {
-                        return newFilePath.toAbsolutePath().toString();
-                    }
+        //wait for the content to be ready.
+        getContinuation.sleep();
 
-                    @Override
-                    public void receiveResult(PastContent pastContent) {
-                        newFilePath = null;
-                        if (pastContent == null) {
-                            logger.warning("Unable to locate content");
-                        } else if (pastContent instanceof StorMessage) {
-                            logger.info("StorMessage found... save and return file location");
-                            StorMessage message = (StorMessage) pastContent;
-                            newFilePath = FileUtils.putFileData(message.fileContent);
-                            if (newFilePath == null) {
-                                logger.info("Valid message received. File save FAILED.");
-                            } else {
-                                logger.info("Valid message received. File save SUCCESSFUL.");
-                            }
-                        } else {
-                            logger.info("Unknown message received.");
-                        }
-                    }
-
-                    @Override
-                    public void receiveException(Exception e) {
-                        newFilePath = null;
-                        logger.log(Level.WARNING, "Exception during lookup", e);
-                    }
-                });
-//
-//        try {
-//            ;
-////            lookUpContinuation.wait();
-//        }
-//        catch (Exception ex)
-//        {
-//            logger.log(Level.SEVERE, "Lookup Excception", ex);
-//        }
-
-        return null;
+        /**
+         * getContinuation sleep ended. check if the content is available and report back
+         *
+         * first we verify that an exception was not thrown while trying to retrieve content
+         * then we obtain the result, check it matches what we need and process it
+         */
+        if (getContinuation.exceptionThrown()) {
+            //an error occurred during lookup. for now we just log and respond with failure
+            logger.log(Level.SEVERE, "Get Failed", getContinuation.getException());
+            return null;
+        } else {
+            Object result = getContinuation.getResult();
+            if (result == null) {
+                //lookup failed
+                logger.severe("Lookup failed to locate content");
+                return null;
+            } else if (result instanceof StorMessage) {
+                //a valid, non empty message was received. try to save it
+                StorMessage message = (StorMessage) result;
+                Path newFilePath = FileUtils.putFileData(message.getFileContent());
+                if (newFilePath == null) {
+                    logger.severe("Failed to save file");
+                    return null;
+                } else {
+                    logger.info("Located content store in: " + newFilePath.toString());
+                    return newFilePath.toString();
+                }
+            } else {
+                //unexpected result type
+                logger.severe("Unknown result - " + result.getClass().getName());
+                return null;
+            }
+        }
     }
 }
