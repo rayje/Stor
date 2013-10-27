@@ -15,7 +15,6 @@ import rice.pastry.standard.RandomNodeIdFactory;
 import rice.persistence.*;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -24,8 +23,6 @@ import java.util.logging.Logger;
 public class StorApplication implements IStorApplication {
     private static final Logger logger = Logger.getLogger(StorApplication.class.getName());
 
-    //stor port
-    private static final int STOR_PORT = 17373;
     //10M disk storage
     private static final long MAX_DISK_STORAGE_CAPACITY = 10 * 1024 * 1024;
     //default disk storage location
@@ -36,12 +33,9 @@ public class StorApplication implements IStorApplication {
     private Past pastApp;
     private PastryIdFactory messageIdFactory;
 
-    public StorApplication(int bindPort, final Environment environment) throws IOException, InterruptedException {
-        logger.info("StorApplication - begin initialization");
 
-        //attach the node to the specified application boot port
-        InetAddress address = InetAddress.getLocalHost();
-        InetSocketAddress thisHostSocket = new InetSocketAddress(address, STOR_PORT);
+    public StorApplication(int bindPort, InetSocketAddress bootAddress, final Environment environment) throws IOException, InterruptedException {
+        logger.info("StorApplication - begin initialization");
 
         //generate a random node id
         PastryNodeFactory pastryNodeFactory = new SocketPastryNodeFactory(new RandomNodeIdFactory(environment), bindPort, environment);
@@ -59,7 +53,7 @@ public class StorApplication implements IStorApplication {
         pastApp = new PastImpl(node, storageManager, 0, "");
 
         //boot node
-        node.boot(thisHostSocket);
+        node.boot(bootAddress);
 
         // the node may require sending several messages to fully boot into the ring
         synchronized (node) {
@@ -105,8 +99,8 @@ public class StorApplication implements IStorApplication {
                 }
             });
 
-            logger.log(Level.INFO, "Attempting to put fileContent - {0}", id);
-            return id.toString();
+            logger.log(Level.INFO, "Attempting to put fileContent - {0}", id.toStringFull());
+            return id.toStringFull();
         }
     }
 
@@ -117,35 +111,49 @@ public class StorApplication implements IStorApplication {
         Id contentId = messageIdFactory.buildIdFromToString(fileId);
 
         //trigger past lookup
-        pastApp.lookup(contentId, new Continuation<PastContent, Exception>() {
-            @Override
-            public void receiveResult(PastContent pastContent) {
-                if (pastContent == null) {
-                    logger.warning("Unable to locate content");
-                } else if (pastContent instanceof StorMessage) {
-                    logger.info("StorMessage found... save and return file location");
-                    StorMessage message = (StorMessage) pastContent;
-                    Path newFilePath = FileUtils.putFileData(message.fileContent);
-                    if (newFilePath == null) {
-                        logger.info("Valid message received. File save FAILED.");
-//                        todo: how do i return from this
-//                        return null;
-                    } else {
-                        logger.info("Valid message received. File save SUCCESSFUL.");
-//                        return newFilePath.toString();
+        pastApp.lookup(contentId,
+                new Continuation<PastContent, Exception>() {
+                    private Path newFilePath;
+
+                    public String getFilePath() {
+                        return newFilePath.toAbsolutePath().toString();
                     }
-                } else {
-                    logger.info("Unknown message received.");
-                }
-            }
 
-            @Override
-            public void receiveException(Exception e) {
-                logger.log(Level.WARNING, "Exception during lookup", e);
-            }
-        });
+                    @Override
+                    public void receiveResult(PastContent pastContent) {
+                        newFilePath = null;
+                        if (pastContent == null) {
+                            logger.warning("Unable to locate content");
+                        } else if (pastContent instanceof StorMessage) {
+                            logger.info("StorMessage found... save and return file location");
+                            StorMessage message = (StorMessage) pastContent;
+                            newFilePath = FileUtils.putFileData(message.fileContent);
+                            if (newFilePath == null) {
+                                logger.info("Valid message received. File save FAILED.");
+                            } else {
+                                logger.info("Valid message received. File save SUCCESSFUL.");
+                            }
+                        } else {
+                            logger.info("Unknown message received.");
+                        }
+                    }
 
-        //todo: return the value of the filePath where the data is actually stored
+                    @Override
+                    public void receiveException(Exception e) {
+                        newFilePath = null;
+                        logger.log(Level.WARNING, "Exception during lookup", e);
+                    }
+                });
+//
+//        try {
+//            ;
+////            lookUpContinuation.wait();
+//        }
+//        catch (Exception ex)
+//        {
+//            logger.log(Level.SEVERE, "Lookup Excception", ex);
+//        }
+
         return null;
     }
 }

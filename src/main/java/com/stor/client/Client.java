@@ -1,6 +1,7 @@
 package com.stor.client;
 
 import com.stor.commands.Command;
+import com.stor.commands.GetCommand;
 import com.stor.commands.PutCommand;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -19,7 +20,8 @@ public class Client {
 
     private final String host;
     private final int port;
-    private final Command command;
+    private final Command putCommand;
+    private final GetCommand getCommand;
 
     public static void main(String[] args) throws Exception {
         final String host = "127.0.0.1";
@@ -31,7 +33,8 @@ public class Client {
     public Client(String host, int port) {
         this.host = host;
         this.port = port;
-        this.command = new PutCommand("Test");
+        this.putCommand = new PutCommand("Test");
+        this.getCommand = new GetCommand("0000000000000000000000000000000A64636261");
     }
 
     public void run() throws Exception {
@@ -49,7 +52,7 @@ public class Client {
                         socketChannel.pipeline().addLast(
                                 new ObjectEncoder(),
                                 new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                new ClientHandler(command));
+                                new ClientHandler(getCommand));
                     }
                 });
 

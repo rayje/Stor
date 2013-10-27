@@ -1,7 +1,6 @@
 package com.stor.client;
 
-import com.stor.commands.Command;
-import com.stor.commands.Result;
+import com.stor.commands.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -19,13 +18,18 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void channelActive(ChannelHandlerContext ctx) {
-        logger.log(Level.INFO, "Sending Command: " + command.getType());
+        logger.log(Level.INFO, "Sending Command: " + command);
         ctx.writeAndFlush(command);
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object result) throws Exception {
-        logger.log(Level.INFO, "Result: " + ((Result) result));
-
+        if (command.getType() == CommandType.PUT) {
+            logger.log(Level.INFO, "" + (PutCommandResult) result);
+        } else if (command.getType() == CommandType.GET) {
+            logger.log(Level.INFO, "" + (GetCommandResult) result);
+        } else {
+            logger.log(Level.INFO, "" + (Result) result);
+        }
         ctx.close();
     }
 

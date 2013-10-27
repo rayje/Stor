@@ -27,4 +27,8 @@ public class GetCommandResult extends CommandResult implements Serializable {
     {
        return filePath;
     }
+
+    public String toString() {
+        return "GetCommandResult [" + filePath + "]";
+    }
 }

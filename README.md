@@ -42,7 +42,7 @@ There are helper scripts provided to assist in running the client and server app
 
 To run the server run the following command:
 
-    $ ./bin/server <port>
+    $ ./bin/server <application_ring_hostname>
 
 #### Arguments:
 - port: The port to be used by the freepastry server.

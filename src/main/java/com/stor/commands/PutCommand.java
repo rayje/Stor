@@ -24,4 +24,7 @@ public class PutCommand implements Command, Serializable {
         return type;
     }
 
+    public String toString() {
+        return "PutCommand [" + filePath + "]";
+    }
 }

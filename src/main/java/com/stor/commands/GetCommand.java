@@ -1,5 +1,7 @@
 package com.stor.commands;
 
+import java.io.Serializable;
+
 /**
  * GetCommand - represents requests sent by the client to the server
  * to initiate a content lookup request.
@@ -7,7 +9,7 @@ package com.stor.commands;
  *
  * @see PutCommandResult
  */
-public class GetCommand implements Command {
+public class GetCommand implements Command, Serializable {
 
     private final CommandType type = CommandType.GET;
 
@@ -24,5 +26,9 @@ public class GetCommand implements Command {
     @Override
     public CommandType getType() {
         return type;
+    }
+
+    public String toString() {
+        return "GetCommand [" + fileId + "]";
     }
 }

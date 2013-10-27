@@ -17,6 +17,8 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import rice.environment.Environment;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.logging.Logger;
 
 /**
@@ -28,27 +30,36 @@ public class Server {
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
 
+    //local application server port. this port is used by the client to connect to and send commands to the server
+    private static final int SERVER_PORT = 15080;
+
+    //pastry ring port number. this port number is where an pastry node will boot to
+    private static final int PASTRY_RING_PORT = 17373;
+
+
     private final int port;
     private IStorApplication application;
 
     public static void main(String[] args) throws Exception {
 
         if(args.length != 1) {
-            System.out.println("Usage: COMMAND <PASTRY_PORT_NUM>");
+            System.out.println("Usage: COMMAND <PASTRY_RING_HOST_NAME>");
+            System.out.println("Eg: To initialize a Pastry Ring: MYHOSTNAME");
+            System.out.println("Eg: To join a Pastry Ring: RING_HOSTNAME");
             System.exit(1);
         }
 
         Environment environment = new Environment();
         environment.getParameters().setString("nat_search_policy", "never");
 
-        int port = 15080;
-        int bindPort = Integer.parseInt(args[0]);
+        //initialize the boot address for the pastry ring.
+        InetSocketAddress bootAddress = new InetSocketAddress(InetAddress.getByName(args[0]), PASTRY_RING_PORT);
 
         //intialize the Application before accepting client commands
-        IStorApplication application = new StorApplication(bindPort, environment);
+        IStorApplication application = new StorApplication(PASTRY_RING_PORT, bootAddress, environment);
 
         //init server
-        new Server(port, application).run();
+        new Server(SERVER_PORT, application).run();
     }
 
     public Server(int port, IStorApplication application) {

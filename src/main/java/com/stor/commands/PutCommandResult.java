@@ -26,4 +26,8 @@ public class PutCommandResult extends CommandResult {
     {
         return this.fileId;
     }
+
+    public String toString() {
+        return "PutCommandResult [" + fileId + "]";
+    }
 }
