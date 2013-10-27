@@ -1,0 +1,21 @@
+#!/bin/bash
+#================================================
+# The stor script is the central controller
+# for user interaction with all Stor components
+#================================================
+
+while getopts ":sc" opt; do
+  case $opt in
+    c)
+      echo "starting client!" >&2
+      ;;
+    s)
+      echo "starting server!" >&2
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+# Add logic to start server and client
