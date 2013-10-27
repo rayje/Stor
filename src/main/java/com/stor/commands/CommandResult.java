@@ -3,20 +3,23 @@ package com.stor.commands;
 import java.io.Serializable;
 
 /**
- * User: rayje
- * Date: 10/14/13
- * Time: 9:47 PM
+ * CommandResult - an implementation of the Result interface.
+ * @see Result
+ *
+ * This class is implemented as an abstract class to prevent its direct use
+ * @see GetCommandResult, PutCommandReult
+ *
  */
 public abstract class CommandResult implements Result, Serializable {
 
-    private final ResultType type;
+    private final ResultType resultType;
 
-    public CommandResult(ResultType type) {
-        this.type = type;
+    public CommandResult(ResultType resultType) {
+        this.resultType = resultType;
     }
 
     @Override
     public ResultType getResultType() {
-        return type;
+        return resultType;
     }
 }

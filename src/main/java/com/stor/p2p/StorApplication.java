@@ -78,7 +78,7 @@ public class StorApplication implements IStorApplication {
         logger.info("StorApplication - initialization complete");
     }
 
-    public Id put(String filePath) {
+    public String put(String filePath) {
         logger.info("put");
 
         byte[] fileContent = FileUtils.getFileData(filePath);
@@ -91,6 +91,8 @@ public class StorApplication implements IStorApplication {
 
             //save message
             StorMessage message = new StorMessage(id, fileContent);
+
+            //trigger past insert
             pastApp.insert(message, new Continuation<Boolean[], Exception>() {
                 @Override
                 public void receiveResult(Boolean[] results) {
@@ -104,13 +106,17 @@ public class StorApplication implements IStorApplication {
             });
 
             logger.log(Level.INFO, "Attempting to put fileContent - {0}", id);
-            return id;
+            return id.toString();
         }
     }
 
-    public String get(Id contentId) {
+    public String get(String fileId) {
         logger.info("get");
 
+        //given the fileId (which
+        Id contentId = messageIdFactory.buildIdFromToString(fileId);
+
+        //trigger past lookup
         pastApp.lookup(contentId, new Continuation<PastContent, Exception>() {
             @Override
             public void receiveResult(PastContent pastContent) {
