@@ -6,8 +6,9 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-wget https://raw.github.com/rayje/Stor/master/tools/env.sh -P /tmp
+wget -q https://raw.github.com/rayje/Stor/master/tools/env.sh -P /tmp
 . /tmp/env.sh
+rm /tmp/env.sh
 
 if [ "$JAVA_HOME" = "" ]; then
     echo "Could not find java. Aborting."
@@ -41,7 +42,7 @@ clone_stor() {
 }
 
 install_pastry() {
-    if [ ! -c $LOCAL_PASTRY ]; then
+    if [ ! -d $LOCAL_PASTRY ]; then
         mkdir $LOCAL_PASTRY
     fi
 
@@ -85,7 +86,7 @@ compile_stor() {
     mvn compile
 }
 
-#trap on_exit EXIT
+trap on_exit EXIT
 
 log "Created tmp: $TMP"
 cd $TMP
