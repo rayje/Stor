@@ -4,18 +4,71 @@
 # for user interaction with all Stor components
 #================================================
 
-while getopts ":sc" opt; do
+usage()
+{
+cat << EOF
+usage: $0 options
+
+This script is used to run the Stor server and client. The -c or -s option must
+be provided to start either the server or the client.
+
+OPTIONS:
+    -h      Show this message
+    -c      Start the client
+    -s      Start the server
+    -p      The port to be used by the Pastry server. This is required whe using the -s option.
+EOF
+}
+
+CMD=
+PORT=
+while getopts "p:sch" opt; do
   case $opt in
+    h)
+        usage
+        exit 1
+      ;;
     c)
-      echo "starting client!" >&2
+        CMD=Client
       ;;
     s)
-      echo "starting server!" >&2
+        CMD=Server
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    p)
+        PORT=$OPTARG
+      ;;
+    ?)
+        usage
+        exit 1
       ;;
   esac
 done
 
-# Add logic to start server and client
+if [[ -z $CMD ]]; then
+     usage
+     exit 1
+fi
+
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+STOR="$( cd -P "$( dirname "$SOURCE" )"/.. && pwd )"
+
+. $STOR/bin/env.sh
+
+# Start server or client
+if [ $CMD = "Client" ]; then
+    echo "starting client!" >&2
+    $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.client.Client
+else
+    if [[ -z $PORT ]]; then 
+        echo "Missing required port parameter"
+        usage
+        exit 1
+    fi
+    echo "starting server on port $PORT!" >&2
+    $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.server.Server $PORT &
+fi
