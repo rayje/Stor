@@ -1,23 +1,23 @@
 package com.stor.commands;
 
-import rice.p2p.commonapi.Id;
-
 /**
- * User: rayje
- * Date: 10/14/13
- * Time: 9:34 PM
+ * GetCommand - represents requests sent by the client to the server
+ * to initiate a content lookup request.
+ * The fileId is the identifier which the server will use to perform the lookup
+ *
+ * @see PutCommandResult
  */
 public class GetCommand implements Command {
 
     private final CommandType type = CommandType.GET;
 
-    private final Id fileId;
+    private final String fileId;
 
-    public GetCommand(Id fileId) {
+    public GetCommand(String fileId) {
         this.fileId = fileId;
     }
 
-    public Id getId() {
+    public String getFileId() {
         return fileId;
     }
 
