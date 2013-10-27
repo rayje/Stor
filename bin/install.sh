@@ -86,7 +86,7 @@ compile_stor() {
         exit 1
     fi
 
-    mvn compile
+    mvn clean compile assembly:single
 }
 
 install_stor() {
@@ -101,7 +101,15 @@ install_stor() {
     cp -R $TMP/Stor/bin $STOR_INSTALL_DIR
     chmod 755 $STOR_INSTALL_DIR/bin/*
 
-    ln -s $STOR_INSTALL_DIR/bin/stor /usr/local/bin/stor
+    if [ ! -h /usr/local/bin/stor ]; then
+        ln -s $STOR_INSTALL_DIR/bin/stor /usr/local/bin/stor
+    fi
+
+    if [ ! -d $STOR_INSTALL_DIR/lib ]; then
+        mkdir -p $STOR_INSTALL_DIR/lib
+    fi
+
+    cp $TMP/Stor/target/stor-1.0-jar-with-dependencies.jar $STOR_INSTALL_DIR/lib/stor-1.0.jar
 }
 
 trap on_exit EXIT
