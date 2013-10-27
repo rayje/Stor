@@ -45,7 +45,7 @@ To run the server run the following command:
     $ ./bin/server <application_ring_hostname>
 
 #### Arguments:
-- port: The port to be used by the freepastry server.
+- application_ring_hostname: The hostname of the pastry ring server. To start a new application ring, specify the current server hostname.
 
 ### Client
 
