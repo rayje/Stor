@@ -6,7 +6,8 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-. /home/rayje/env.sh
+wget https://raw.github.com/rayje/Stor/master/tools/env.sh -P /tmp
+. /tmp/env.sh
 
 if [ "$JAVA_HOME" = "" ]; then
     echo "Could not find java. Aborting."
