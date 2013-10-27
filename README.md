@@ -22,7 +22,7 @@ successfully compile and package the Stor application.
 
 To build the application, execute the following command:
 
-    $ ./build
+    $ ./bin/build
 
 ## Installing the app
 
@@ -30,7 +30,7 @@ NOTE: The install scripts are written and tested to run on a Linux system.
 
 To install the application on a Linux system, run the following command:
 
-    $ curl -s https://raw.github.com/rayje/Stor/master/tools/install.sh | sudo sh
+    $ curl -s https://raw.github.com/rayje/Stor/master/bin/install.sh | sudo sh
 
 This will install all the dependencies for the Stor application and install Stor in <code>/usr/local/Stor</code>
 
@@ -42,7 +42,7 @@ There are helper scripts provided to assist in running the client and server app
 
 To run the server run the following command:
 
-    $ ./server <port>
+    $ ./bin/server <port>
 
 #### Arguments:
 - port: The port to be used by the freepastry server.
@@ -51,5 +51,5 @@ To run the server run the following command:
 
 To run the client, execute the following command:
 
-    $ ./client
+    $ ./bin/client
 
