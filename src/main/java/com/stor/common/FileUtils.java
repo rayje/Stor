@@ -10,10 +10,6 @@ public class FileUtils {
 
     private static final Logger logger = Logger.getLogger(FileUtils.class.getName());
 
-    private static final FileAttribute<Set<PosixFilePermission>> ownerReadWriteAttributes = PosixFilePermissions.asFileAttribute(
-            PosixFilePermissions.fromString("rw-------")
-    );
-
     /**
      * Fetches the content of the provided filePath
      * @param filePath - absolute file path
@@ -43,7 +39,7 @@ public class FileUtils {
     {
         try
         {
-            Path tempFile = Files.createTempFile("putFileData_", null, ownerReadWriteAttributes);
+            Path tempFile = Files.createTempFile("putFileData_", null);
             logger.info("putFileData attempt to write content to: " + tempFile.toAbsolutePath());
             Files.write(tempFile, fileData, StandardOpenOption.CREATE);
             return tempFile;
