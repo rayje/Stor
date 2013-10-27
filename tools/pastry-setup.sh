@@ -6,8 +6,8 @@
 #==============================================================================
 
 STOR_TOOLS_DIR=$(pwd)
-M2_REPO=~/.m2/repository
-PASTRY_DIR=~/Documents/Java_Library/pastry-2.1
+M2_REPO=${M2_REPO:-~/.m2/repository}
+PASTRY_DIR=${PASTRY_DIR:-~/Documents/Java_Library/pastry-2.1}
 UPNPLIB_REPO=$M2_REPO/net/sbbi/sbbi-upnplib/1.0.4
 
 #==============================================
