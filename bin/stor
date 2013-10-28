@@ -117,6 +117,6 @@ else
         usage
         exit 1
     fi
-    echo "starting server on port $HOST_ADDR!" >&2
+    echo "starting server using host address: $HOST_ADDR!" >&2
     $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.server.Server $HOST_ADDR &
 fi
