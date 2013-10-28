@@ -102,7 +102,7 @@ public class StorApplicationImpl implements StorApplication {
             appResponse.setResponse(id.toStringFull());
         } catch (Exception e) {
             logger.log(Level.WARNING, "", e);
-            appResponse.setErrorMessage(e.getMessage());
+            appResponse.setErrorMessage(e.getClass().getName() + ":" + e.getMessage());
         }
 
         return appResponse;
@@ -159,9 +159,9 @@ public class StorApplicationImpl implements StorApplication {
                 //unexpected result type
                 throw new StorException("Unknown result - " + result.getClass().getName());
             }
-        } catch (Exception ex) {
-            logger.log(Level.WARNING, "", ex);
-            appResponse.setErrorMessage(ex.getMessage());
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "", e);
+            appResponse.setErrorMessage(e.getClass().getName() + ":" + e.getMessage());
         }
 
         return appResponse;
