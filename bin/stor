@@ -23,8 +23,8 @@ SERVER OPTIONS:
 
 CLIENT OPTIONS:
     -a      The action to take (PUT, GET, DELETE).
-    -i      The file id to be used with a GET action.
-    -f      The filename used for the PUT action.
+    -i      The file id to be used with a GET action. Required when using the GET action.
+    -f      The filename used for the PUT action. Required when using the PUT action.
 EOF
 }
 
