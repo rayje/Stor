@@ -32,7 +32,7 @@ public class Client {
         final String cmd = args[0].toUpperCase();
         final String fileName = args[1];
 
-        if (!cmd.equals("PUT") && !cmd.equalsIgnoreCase("GET")) {
+        if (!cmd.equals("PUT") && !cmd.equals("GET")) {
             QuitOnError();
         }
 
