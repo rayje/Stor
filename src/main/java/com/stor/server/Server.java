@@ -19,6 +19,7 @@ import rice.environment.Environment;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,17 +50,23 @@ public class Server {
             System.exit(1);
         }
 
-        Environment environment = new Environment();
-        environment.getParameters().setString("nat_search_policy", "never");
+        try {
+            Environment environment = new Environment();
+            environment.getParameters().setString("nat_search_policy", "never");
 
-        //initialize the boot address for the pastry ring.
-        InetSocketAddress bootAddress = new InetSocketAddress(InetAddress.getByName(args[0]), PASTRY_RING_PORT);
+            //initialize the boot address for the pastry ring.
+            InetSocketAddress bootAddress = new InetSocketAddress(InetAddress.getByName(args[0]), PASTRY_RING_PORT);
 
-        //intialize the Application before accepting client commands
-        IStorApplication application = new StorApplication(PASTRY_RING_PORT, bootAddress, environment);
-
-        //init server
-        new Server(SERVER_PORT, application).run();
+            IStorApplication application;
+            //intialize the Application before accepting client commands
+            application = new StorApplication(PASTRY_RING_PORT, bootAddress, environment);
+            //init server
+            new Server(SERVER_PORT, application).run();
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Application Error", ex);
+            System.out.println("Application Error. Reason: " + ex.getMessage());
+            System.exit(1);
+        }
     }
 
     public Server(int port, IStorApplication application) {
