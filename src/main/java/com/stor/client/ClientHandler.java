@@ -37,4 +37,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         logger.log(Level.WARNING, "Unexpected exception from downstream.", cause);
         ctx.close();
     }
+
+    public void messageReceived(ChannelHandlerContext ctx, CommandResult e) {
+        ResultType result = e.getResultType();
+
+        if (result.toString().equals("SUCCESS")) System.out.println("Command success.");
+        else System.out.println("Command faied.");
+    }
 }
