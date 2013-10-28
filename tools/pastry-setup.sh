@@ -47,7 +47,7 @@ if [ ! -d $M2_REPO/pastry ]; then
     cp pastry.pom $PASTRY_DIR/pom.xml
 
     cd $PASTRY_DIR
-    mvn -X install
+    mvn install
 
     echo "\n==============================================================="
     if [ -f $M2_REPO/pastry/pastry/2.1/pastry-2.1.jar ]; then
