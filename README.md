@@ -53,7 +53,7 @@ A symbolic is created in <code>/usr/local/bin</code>
 
 ## Usage
 
-After installation, the stor script installed at <code>/usr/local/stor/bin</stor> can be used for user interaction
+After installation, the stor script installed at <code>/usr/local/stor/bin</code> can be used for user interaction
 with the Stor application. The stor scripts provides options for interaction with both the client and the server.
 
 The following is a list of options provided by the stor script:
