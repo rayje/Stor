@@ -26,7 +26,7 @@ To build the application, execute the following command:
 
 ## Installing the app
 
-NOTE: The install scripts are written and tested to run on a Linux system.
+**NOTE**: The install scripts are written and tested to run on a Linux system.
 
 To install the application on a Linux system, run the following command:
 
@@ -46,7 +46,7 @@ Once installation is complete, the following files will be installed:
     /usr/local/stor/lib
     /usr/local/stor/lib/stor-1.0.jar
 
-A symbolic is created in <code>/usr/local/bin</code>
+A symbolic link is created in <code>/usr/local/bin</code>
 
     $ ls -ltr /usr/local/bin/stor
     lrwxrwxrwx 1 root root 24 Oct 27 15:49 /usr/local/bin/stor -> /usr/local/stor/bin/stor
