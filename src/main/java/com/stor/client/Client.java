@@ -1,6 +1,7 @@
 package com.stor.client;
 
 import com.stor.commands.Command;
+import com.stor.commands.GetCommand;
 import com.stor.commands.PutCommand;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -19,8 +20,8 @@ public class Client {
 
     private final String host;
     private final int port;
-    private final Command command;
-    private final String fileName;
+    private Command command;
+
     private static final int NUMARGS = 2;  //expected number of arguments
 
     public static void main(String[] args) throws Exception {
@@ -43,8 +44,12 @@ public class Client {
     public Client(String host, int port, String cmd, String fName) {
         this.host = host;
         this.port = port;
-        this.command = new PutCommand(cmd);
-        this.fileName = fName;
+
+        if (cmd.equals("PUT")) {
+            this.command = new PutCommand(fName);
+        } else if (cmd.equals("GET")) {
+            this.command = new GetCommand(fName);
+        }
     }
 
     public void run() throws Exception {
