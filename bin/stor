@@ -16,13 +16,24 @@ OPTIONS:
     -h      Show this message
     -c      Start the client
     -s      Start the server
-    -p      The port to be used by the Pastry server. This is required whe using the -s option.
+
+SERVER OPTIONS:
+    -p      The host address to be used by the Pastry server. This is required
+            when using the -s option. This can be either the hostname or ip address.
+
+CLIENT OPTIONS:
+    -a      The action to take (PUT, GET, DELETE).
+    -i      The file id to be used with a GET action.
+    -f      The filename used for the PUT action.
 EOF
 }
 
 CMD=
-PORT=
-while getopts "p:sch" opt; do
+HOST_ADDR=
+FILENAME=
+FILEID=
+ACTION=
+while getopts "p:f:a:i:sch" opt; do
   case $opt in
     h)
         usage
@@ -35,7 +46,16 @@ while getopts "p:sch" opt; do
         CMD=Server
       ;;
     p)
-        PORT=$OPTARG
+        HOST_ADDR=$OPTARG
+      ;; 
+    f)
+	FILENAME=$OPTARG
+      ;;
+    a)
+        ACTION=$OPTARG
+      ;;
+    i)
+        FILEID=$OPTARG
       ;;
     ?)
         usage
@@ -60,15 +80,43 @@ STOR="$( cd -P "$( dirname "$SOURCE" )"/.. && pwd )"
 . $STOR/bin/env.sh
 
 # Start server or client
-if [ $CMD = "Client" ]; then
+if [ "$CMD" = "Client" ]; then
     echo "starting client!" >&2
-    $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.client.Client
+    if [ "$ACTION" = "" ]; then
+        echo "An action is required when running the Client."
+        usage 
+        exit 1
+    fi
+
+    if [ "$ACTION" = "PUT" ]; then  
+        if [ "$FILENAME" = "" ]; then
+            echo "A filename is required for PUT actions"
+            usage
+            exit 1
+        fi
+
+        $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.client.Client PUT $FILENAME 
+
+    elif [ "$ACTION" = "GET" ]; then
+        if [ "$FILEID" = "" ]; then
+            echo "A file Id is required when submitting a GET action"
+            usage
+            exit 1
+        fi
+
+        $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.client.Client GET $FILEID
+    else
+        echo "$ACTION is not a recognized action"
+        usage 
+        exit 1
+    fi	
+
 else
-    if [[ -z $PORT ]]; then 
-        echo "Missing required port parameter"
+    if [[ -z $HOST_ADDR ]]; then 
+        echo "Missing required host address parameter"
         usage
         exit 1
     fi
-    echo "starting server on port $PORT!" >&2
-    $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.server.Server $PORT &
+    echo "starting server on port $HOST_ADDR!" >&2
+    $JAVA_HOME/bin/java -classpath $STOR/lib/stor-1.0.jar com.stor.server.Server $HOST_ADDR &
 fi

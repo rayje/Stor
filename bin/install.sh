@@ -22,7 +22,7 @@ if ! type mvn > /dev/null; then
     exit 1
 fi
 
-STOR_INSTALL_DIR=${STOR_INSTALL_DIR:-/usr/local/Stor}
+STOR_INSTALL_DIR=${STOR_INSTALL_DIR:-/usr/local/stor}
 STOR_REPO=${STOR_REPO:-https://github.com/rayje/Stor.git}
 NAME=StorInstall
 TMP=$(mktemp -d /tmp/stor.XXXXXXXXXX) || { echo "Failed to create temp dir"; exit 1; }
