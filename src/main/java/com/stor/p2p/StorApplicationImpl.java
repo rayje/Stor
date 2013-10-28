@@ -17,6 +17,7 @@ import rice.pastry.standard.RandomNodeIdFactory;
 import rice.persistence.*;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -82,7 +83,9 @@ public class StorApplicationImpl implements StorApplication {
             if (fileContent == null) {
                 throw new StorException("fileContent should not be null");
             }
-            Id id = messageIdFactory.buildId(fileContent);
+
+            //Use the hash of the hostname and filePath for the Pastry Id.
+            Id id = messageIdFactory.buildId(InetAddress.getLocalHost().getCanonicalHostName() + ":" + filePath);
 
             //save message
             StorMessage message = new StorMessage(id, fileContent);
