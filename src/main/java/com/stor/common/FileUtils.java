@@ -1,9 +1,7 @@
 package com.stor.common;
 
+import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.*;
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileUtils {
@@ -17,15 +15,10 @@ public class FileUtils {
      *
      * null indicates failure
      */
-    public static byte[] getFileData(String filePath) {
-        try {
-            Path path = Paths.get(filePath);
-            logger.info("getFileData attempt to read content from: " + path.toAbsolutePath());
-            return Files.readAllBytes(path);
-        } catch (Exception ex) {
-            logger.log(Level.WARNING, "Exception", ex);
-            return null;
-        }
+    public static byte[] getFileData(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        logger.info("getFileData attempt to read content from: " + path.toAbsolutePath());
+        return Files.readAllBytes(path);
     }
 
     /**
@@ -35,19 +28,11 @@ public class FileUtils {
      *
      * null indicates failure
      */
-    public static Path putFileData(byte[] fileData)
-    {
-        try
-        {
-            Path tempFile = Files.createTempFile("putFileData_", null);
-            logger.info("putFileData attempt to write content to: " + tempFile.toAbsolutePath());
-            Files.write(tempFile, fileData, StandardOpenOption.CREATE);
-            return tempFile;
-        }
-        catch(Exception ex)
-        {
-            logger.log(Level.WARNING, "Exception", ex);
-            return null;
-        }
+    public static Path putFileData(byte[] fileData) throws IOException {
+        Path tempFile = Files.createTempFile("putFileData_", null);
+        logger.info("putFileData attempt to write content to: " + tempFile.toAbsolutePath());
+        Files.write(tempFile, fileData, StandardOpenOption.CREATE);
+        return tempFile;
+
     }
 }

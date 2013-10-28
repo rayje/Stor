@@ -1,7 +1,7 @@
 package com.stor.server;
 
-import com.stor.p2p.IStorApplication;
 import com.stor.p2p.StorApplication;
+import com.stor.p2p.StorApplicationImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -39,7 +39,7 @@ public class Server {
 
 
     private final int port;
-    private IStorApplication application;
+    private StorApplication application;
 
     public static void main(String[] args) throws Exception {
 
@@ -57,9 +57,9 @@ public class Server {
             //initialize the boot address for the pastry ring.
             InetSocketAddress bootAddress = new InetSocketAddress(InetAddress.getByName(args[0]), PASTRY_RING_PORT);
 
-            IStorApplication application;
+            StorApplication application;
             //intialize the Application before accepting client commands
-            application = new StorApplication(PASTRY_RING_PORT, bootAddress, environment);
+            application = new StorApplicationImpl(PASTRY_RING_PORT, bootAddress, environment);
             //init server
             new Server(SERVER_PORT, application).run();
         } catch (Exception ex) {
@@ -69,7 +69,7 @@ public class Server {
         }
     }
 
-    public Server(int port, IStorApplication application) {
+    public Server(int port, StorApplication application) {
         this.port = port;
         this.application = application;
     }

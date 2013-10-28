@@ -7,7 +7,7 @@ package com.stor.commands;
  * Implementers of this class should use the ResultType class
  * to indicate the type of result given by the implementation.
  */
-public interface Result {
+public interface Result<T> {
 
     /**
      * A getter method to retrieve the ResultType.
@@ -16,4 +16,15 @@ public interface Result {
      * @see ResultType
      */
     ResultType getResultType();
+
+    /**
+     * getter for the actual Result
+     * @return T
+     */
+    T getResult();
+
+    /**
+     * getter for the errorMessage
+     */
+    String getErrorMessage();
 }

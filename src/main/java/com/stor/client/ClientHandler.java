@@ -23,13 +23,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object result) throws Exception {
-        if (command.getType() == CommandType.PUT) {
-            logger.log(Level.INFO, "" + (PutCommandResult) result);
-        } else if (command.getType() == CommandType.GET) {
-            logger.log(Level.INFO, "" + (GetCommandResult) result);
-        } else {
-            logger.log(Level.INFO, "" + (Result) result);
-        }
+        logger.log(Level.INFO, "" + result);
         ctx.close();
     }
 

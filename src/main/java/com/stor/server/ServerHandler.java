@@ -1,7 +1,9 @@
 package com.stor.server;
 
 import com.stor.commands.*;
-import com.stor.p2p.IStorApplication;
+import com.stor.p2p.AppResponse;
+import com.stor.p2p.AppResponseImpl;
+import com.stor.p2p.StorApplication;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,49 +19,59 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = Logger.getLogger(ServerHandler.class.getName());
 
-    private IStorApplication application;
+    private StorApplication application;
 
-    public ServerHandler(IStorApplication application) {
+    public ServerHandler(StorApplication application) {
         this.application = application;
     }
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object command) throws Exception {
-        CommandResult result;
-        ResultType resultType;
+        AppResponse response;
 
-        switch (((Command)command).getType()) {
+        switch (((Command) command).getType()) {
             case GET:
                 GetCommand getCommand = (GetCommand) command;
                 logger.log(Level.INFO, "Server received GET command" + getCommand);
-                String filePath = application.get(getCommand.getFileId());
-                resultType = (filePath == null) ? ResultType.FAILURE : ResultType.SUCCESS;
-                result = new GetCommandResult(resultType, filePath);
+                response = application.get(getCommand.getFileId());
                 break;
             case PUT:
-                logger.log(Level.INFO, "Server received PUT command");
                 PutCommand putCommand = (PutCommand) command;
-                String fileId = application.put(putCommand.getFilePath());
-                resultType = (fileId == null) ? ResultType.FAILURE : ResultType.SUCCESS;
-                result = new PutCommandResult(resultType, fileId);
+                logger.log(Level.INFO, "Server received PUT command" + putCommand);
+                response = application.put(putCommand.getFilePath());
                 break;
             default:
-                result = null;
-                logger.log(Level.INFO, "Unsupported command: " + ((Command)command).getType());
+                response = new AppResponseImpl<Boolean>();
+                response.setErrorMessage("Unsupported command: " + ((Command) command).getType());
         }
 
-        final ChannelFuture f = ctx.writeAndFlush(result);
-        f.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
-                ctx.close();
-            }
-        });
+        mapAndSendResponse(ctx, response);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.log(Level.WARNING, "Unexpected exception from downstream.", cause);
         ctx.close();
+    }
+
+    private void mapAndSendResponse(final ChannelHandlerContext ctx, AppResponse appResponse) {
+        CommandResult commandResult;
+        if (appResponse == null) {
+            commandResult = new CommandResult<>(ResultType.FAILURE, Boolean.FALSE, "Unknown error");
+        } else {
+            commandResult = new CommandResult<>(
+                    appResponse.hasError() ? ResultType.FAILURE : ResultType.SUCCESS,
+                    appResponse.getResponse(),
+                    appResponse.getErrorMessage()
+            );
+        }
+
+        final ChannelFuture f = ctx.writeAndFlush(commandResult);
+        f.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                ctx.close();
+            }
+        });
     }
 }
