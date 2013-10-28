@@ -3,11 +3,13 @@ package com.stor.p2p;
 import rice.p2p.commonapi.Id;
 import rice.p2p.past.ContentHashPastContent;
 
+import java.io.Serializable;
+
 /**
  * StorMessage - is a wrapper around ContentHashPastContent which permits us to store data using PAST.
  * fileContent is stored as a byte[].
  */
-public class StorMessage extends ContentHashPastContent {
+public class StorMessage extends ContentHashPastContent implements Serializable {
     private byte[] fileContent;
 
     public StorMessage(Id contentId, byte[] fileContent) {
