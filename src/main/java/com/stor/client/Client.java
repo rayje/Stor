@@ -1,7 +1,6 @@
 package com.stor.client;
 
 import com.stor.commands.Command;
-import com.stor.commands.GetCommand;
 import com.stor.commands.PutCommand;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -20,21 +19,32 @@ public class Client {
 
     private final String host;
     private final int port;
-    private final Command putCommand;
-    private final GetCommand getCommand;
+    private final Command command;
+    private final String fileName;
+    private static final int NUMARGS = 2;  //expected number of arguments
 
     public static void main(String[] args) throws Exception {
+
+        if (args.length != NUMARGS) QuitOnError();
+
         final String host = "127.0.0.1";
         final int port = 15080;
+        final String cmd = args[0].toUpperCase();
+        final String fileName = args[1];
 
-        new Client(host, port).run();
+        if (!cmd.equals("PUT") && !cmd.equalsIgnoreCase("GET")) {
+            QuitOnError();
+        }
+
+        System.out.println("Command accepted: " + cmd + " file: " + fileName);
+        new Client(host, port, cmd, fileName).run();
     }
 
-    public Client(String host, int port) {
+    public Client(String host, int port, String cmd, String fName) {
         this.host = host;
         this.port = port;
-        this.putCommand = new PutCommand("Test");
-        this.getCommand = new GetCommand("0000000000000000000000000000000A64636261");
+        this.command = new PutCommand(cmd);
+        this.fileName = fName;
     }
 
     public void run() throws Exception {
@@ -43,18 +53,18 @@ public class Client {
         try {
             Bootstrap b = new Bootstrap();
             b.group(group)
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .handler(new ChannelInitializer<SocketChannel>() {
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
 
-                    @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast(
-                                new ObjectEncoder(),
-                                new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
-                                new ClientHandler(getCommand));
-                    }
-                });
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) throws Exception {
+                            socketChannel.pipeline().addLast(
+                                    new ObjectEncoder(),
+                                    new ObjectDecoder(ClassResolvers.cacheDisabled(null)),
+                                    new ClientHandler(command));
+                        }
+                    });
 
             ChannelFuture f = b.connect(host, port).sync();
             f.channel().closeFuture().sync();
@@ -62,4 +72,11 @@ public class Client {
             group.shutdownGracefully();
         }
     }
+
+    // private helper - quit and print error message
+    private static void QuitOnError() {
+        System.err.println("Usage: Client <PUT> <fileName> or <GET> <fileId>");
+        System.exit(1);
+    }
+
 }
