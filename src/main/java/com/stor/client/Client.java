@@ -15,6 +15,9 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
+import java.io.File;
+import java.io.IOException;
+
 
 public class Client {
 
@@ -26,7 +29,7 @@ public class Client {
 
     public static void main(String[] args) throws Exception {
 
-        if (args.length != NUMARGS) QuitOnError();
+        if (args.length != NUMARGS) QuitOnError("default");
 
         final String host = "127.0.0.1";
         final int port = 15080;
@@ -34,11 +37,22 @@ public class Client {
         final String fileName = args[1];
 
         if (!cmd.equals("PUT") && !cmd.equals("GET")) {
-            QuitOnError();
+            QuitOnError("default");
+        }
+
+        final File filePath = new File(fileName);
+
+        if (!filePath.exists()) QuitOnError("File Does not exist!");
+
+        String filePathStr = filePath.toString(); //filePathStr: String representation of filePath
+        if (!filePath.isAbsolute())
+        {
+            File filePath2 = new File(filePath.getAbsolutePath());
+            filePathStr = GetAbsolutePath(filePath2);
         }
 
         System.out.println("Command accepted: " + cmd + " file: " + fileName);
-        new Client(host, port, cmd, fileName).run();
+        new Client(host, port, cmd, filePathStr).run();
     }
 
     public Client(String host, int port, String cmd, String fName) {
@@ -79,9 +93,26 @@ public class Client {
     }
 
     // private helper - quit and print error message
-    private static void QuitOnError() {
-        System.err.println("Usage: Client <PUT> <fileName> or <GET> <fileId>");
+    private static void QuitOnError(String error) {
+
+        if (error.equals("default")) System.err.println("Usage: Client <PUT> <fileName> or <GET> <fileId>");
+        else System.err.println(error);
+
         System.exit(1);
+    }
+
+    private static String GetAbsolutePath(File a)
+    {
+        File parentFolder = new File(a.getParent());
+        File b = new File(a.toString());
+        String absolutePath = a.toString();
+        try {
+            absolutePath = b.getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return absolutePath;
     }
 
 }
