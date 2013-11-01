@@ -14,7 +14,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-
+import java.nio.file.*;
 import java.io.File;
 import java.io.IOException;
 
@@ -42,12 +42,11 @@ public class Client {
 
         if (cmd.equals("PUT"))
         {
-            final File filePath = new File(fileName);
-            if (!filePath.exists()) QuitOnError("File Does not exist!");
-
+            final Path filePath = Paths.get(fileName);
+            if (!Files.exists(filePath)) QuitOnError("File Does not exist!");
             if (!filePath.isAbsolute())
             {
-               fileName = GetAbsolutePath(new File(filePath.getAbsolutePath()));
+               fileName = filePath.toAbsolutePath().toString();
             }
         }
 
@@ -102,19 +101,4 @@ public class Client {
 
         System.exit(1);
     }
-
-    private static String GetAbsolutePath(File a)
-    {
-        File parentFolder = new File(a.getParent());
-        File b = new File(a.toString());
-        String absolutePath = a.toString();
-        try {
-            absolutePath = b.getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return absolutePath;
-    }
-
 }
