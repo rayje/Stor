@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 public class StorApplicationImpl implements StorApplication {
     private static final Logger logger = Logger.getLogger(StorApplicationImpl.class.getName());
 
+    //replica count
+    private static final int REPLICA_COUNT = 5;
     //10M disk storage
     private static final long MAX_DISK_STORAGE_CAPACITY = 10 * 1024 * 1024;
     //default disk storage location
@@ -53,13 +55,13 @@ public class StorApplicationImpl implements StorApplication {
         StorageManager storageManager = new StorageManagerImpl(messageIdFactory, diskStorage, inMemoryCache);
 
         //attach the Past application to the current node
-        pastApp = new PastImpl(node, storageManager, 0, "");
+        pastApp = new PastImpl(node, storageManager, REPLICA_COUNT, "");
 
         //boot node
         node.boot(bootAddress);
 
         // the node may require sending several messages to fully boot into the ring
-        synchronized (this) {
+        synchronized (node) {
             while (!node.isReady()) {
                 // abort if can't join
                 if (node.joinFailed()) {
@@ -68,7 +70,6 @@ public class StorApplicationImpl implements StorApplication {
 
                 // delay so we don't busy-wait
                 node.wait(500);
-
             }
         }
 
