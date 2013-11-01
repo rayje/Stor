@@ -34,25 +34,27 @@ public class Client {
         final String host = "127.0.0.1";
         final int port = 15080;
         final String cmd = args[0].toUpperCase();
-        final String fileName = args[1];
+               String fileName = args[1];
 
         if (!cmd.equals("PUT") && !cmd.equals("GET")) {
             QuitOnError("default");
         }
 
-        final File filePath = new File(fileName);
-
-        if (!filePath.exists()) QuitOnError("File Does not exist!");
-
-        String filePathStr = filePath.toString(); //filePathStr: String representation of filePath
-        if (!filePath.isAbsolute())
+        if (cmd.equals("PUT"))
         {
-            File filePath2 = new File(filePath.getAbsolutePath());
-            filePathStr = GetAbsolutePath(filePath2);
+            final File filePath = new File(fileName);
+            if (!filePath.exists()) QuitOnError("File Does not exist!");
+
+            if (!filePath.isAbsolute())
+            {
+               fileName = GetAbsolutePath(new File(filePath.getAbsolutePath()));
+            }
         }
 
+
+
         System.out.println("Command accepted: " + cmd + " file: " + fileName);
-        new Client(host, port, cmd, filePathStr).run();
+        new Client(host, port, cmd, fileName).run();
     }
 
     public Client(String host, int port, String cmd, String fName) {
