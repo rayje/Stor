@@ -54,6 +54,9 @@ public class Server {
             Environment environment = new Environment();
             environment.getParameters().setString("nat_search_policy", "never");
 
+            //for testing. allow starting a pastry node on localhost
+            environment.getParameters().setString("pastry_socket_allow_lookback", "true");
+
             //initialize the boot address for the pastry ring.
             InetSocketAddress bootAddress = new InetSocketAddress(InetAddress.getByName(args[0]), PASTRY_RING_PORT);
 
