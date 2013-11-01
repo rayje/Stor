@@ -44,7 +44,7 @@ commonapi_testing_protocol = direct
 commonapi_testing_startPort = 5009
 commonapi_testing_num_nodes = 10
 # set this to specify the bootstrap node
-#commonapi_testing_bootstrap = localhost:5009
+commonapi_testing_bootstrap = localhost:5009
 
 # random number generator's seed, "CLOCK" uses the current clock time
 random_seed = CLOCK
@@ -137,7 +137,8 @@ transport_wire_datagram_receive_buffer_size = 131072
 transport_wire_datagram_send_buffer_size = 65536
 
 # NAT/UPnP settings
-nat_network_prefixes = 127.0.0.1;10.;192.168.
+#nat_network_prefixes = 127.0.0.1;10.;192.168.
+nat_network_prefixes = 18.
 # Enable and set this if you have already set up port forwarding and know the external address
 #external_address = 123.45.67.89:1234
 #enable this if you set up port forwarding (on the same port), but you don't 
@@ -149,7 +150,7 @@ pastry_proxy_connectivity_timeout = 15000
 pastry_proxy_connectivity_tries = 3
 # possible values: always, never, prefix (prefix is if the localAddress matches any of the nat_network_prefixes
 # whether to search for a nat using UPnP (default: prefix)
-nat_search_policy = prefix
+nat_search_policy = never
 # whether to verify connectivity (default: boot)
 firewall_test_policy = boot
 # policy for setting port forwarding the state of the firewall if there is already a conflicting rule: overwrite, fail (throw exception), change (use different port) 
