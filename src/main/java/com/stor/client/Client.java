@@ -18,14 +18,26 @@ import java.nio.file.*;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Stor P2P Project
+ * @param host hostname or host IP address
+ * @param port
+ * @param command
+ * @param PUTCMD "PUT"
+ * @param GETCMD "GET"
+ * @param NUMARGS number of arguments expected from the main() method
+ */
+
 
 public class Client {
 
     private final String host;
     private final int port;
     private Command command;
+    private static final String PUTCMD = "PUT";
+    private static final String GETCMD = "GET";
 
-    private static final int NUMARGS = 2;  //expected number of arguments
+    private static final int NUMARGS = 2; //expected number of arguments
 
     public static void main(String[] args) throws Exception {
 
@@ -34,22 +46,27 @@ public class Client {
         final String host = "127.0.0.1";
         final int port = 15080;
         final String cmd = args[0].toUpperCase();
-               String fileName = args[1];
+        String fileName = args[1];
 
-        if (!cmd.equals("PUT") && !cmd.equals("GET")) {
+        if (!cmd.equals(PUTCMD) && !cmd.equals(GETCMD)) {
             QuitOnError("default");
         }
 
-        if (cmd.equals("PUT"))
+        if (cmd.equals(PUTCMD))
         {
-            final Path filePath = Paths.get(fileName);
-            if (!Files.exists(filePath)) QuitOnError("File Does not exist!");
+            final File filePath = new File(fileName);
+            if (!filePath.exists()) QuitOnError("File does not exist!");
+            fileName = filePath.toString();
+
             if (!filePath.isAbsolute())
             {
-               fileName = filePath.toAbsolutePath().toString();
+                try {
+                    fileName = filePath.getCanonicalPath();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
-
 
 
         System.out.println("Command accepted: " + cmd + " file: " + fileName);
@@ -60,9 +77,9 @@ public class Client {
         this.host = host;
         this.port = port;
 
-        if (cmd.equals("PUT")) {
+        if (cmd.equals(PUTCMD)) {
             this.command = new PutCommand(fName);
-        } else if (cmd.equals("GET")) {
+        } else if (cmd.equals(GETCMD)) {
             this.command = new GetCommand(fName);
         }
     }
@@ -102,3 +119,4 @@ public class Client {
         System.exit(1);
     }
 }
+
