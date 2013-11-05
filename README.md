@@ -109,6 +109,10 @@ To run the GET action, run the following command:
 
 ```fileid```: The id of the file returned after executing the PUT action
 
+***STATUS***
 
+To run the STATUS action, run the following command:
+
+    $ stor -x
 
 
