@@ -2,7 +2,6 @@ package com.stor.client.result;
 
 import com.stor.commands.CommandType;
 import com.stor.commands.ResultHandler;
-import com.stor.commands.ResultType;
 
 /**
  * A factory class used to generate the handler capable of handling the
@@ -12,11 +11,11 @@ public class ResultHandlerFactory {
 
     /**
      * A getter method to retrieve a ResultHandler instance capable of
-     * processing the result associated with the {@link ResultType}.
+     * processing the result associated with the {@link CommandType}.
      *
-     * @param type An instance of a {@link ResultType}.
+     * @param type An instance of a {@link CommandType}.
      * @return An instance of a ResultHandler if one is found that is capable
-     * of handling the {@link ResultType}, null otherwise.
+     * of handling the {@link CommandType}, null otherwise.
      */
     public static ResultHandler getResultHandler(CommandType type) {
         switch (type) {

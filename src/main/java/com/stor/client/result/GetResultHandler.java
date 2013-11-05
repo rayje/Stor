@@ -13,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A ResultHandler to handle the result of a GET request.
+ *
  */
 public class GetResultHandler implements ResultHandler {
 

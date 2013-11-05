@@ -11,6 +11,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * The ClientHandler is the interface to the Netty framework.
+ *
+ * This class is meant to send a command to the server and route
+ * the response to the appropriate {@link ResultHandler}
+ */
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = Logger.getLogger(ClientHandler.class.getName());
@@ -33,7 +39,7 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         ResultHandler resultHandler = ResultHandlerFactory.getResultHandler(command.getType());
 
         if (resultHandler != null) {
-            logger.log(Level.INFO, resultHandler.getClass().getName());
+            logger.log(Level.INFO, "ResultHandler: " + resultHandler.getClass().getName());
 
             resultHandler.setCommand(command);
             switch(commandResult.getResultType()) {

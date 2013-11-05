@@ -7,9 +7,8 @@ import com.stor.commands.ResultHandler;
 import java.util.logging.Logger;
 
 /**
- * User: rayje
- * Date: 11/4/13
- * Time: 7:00 PM
+ * A ResultHandler to handle the result of a PUT command.
+ *
  */
 public class PutResultHandler implements ResultHandler {
 
