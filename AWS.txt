@@ -1,0 +1,13 @@
+Stor on AWS
+==
+
+To test the Stor application on AWS, use the following steps.
+
+1. Create a Linux system using the base Ubuntu Image available in AWS
+2. Use the tools/env-setup.sh script to install dependencies
+3. Use the bin/install.sh script to install Stor application on the server
+4. Start the Stor application server (Server 1)
+5. Note down the hostname/IP for Server 1
+6. Now navigate to the launch group Server 1 is running under; to make the server visible on the internet, enable access to all ports for TCP/UDP traffic
+7. Use steps 1-4 to create a second server. Use the same launch group as Server 1
+8. Start the Stor application server (using Server 1 hostname for the Pastry Ring Boot Address)
