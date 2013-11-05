@@ -17,7 +17,8 @@ public enum CommandType {
 
     PUT("PUT"),
     GET("GET"),
-    DELETE("DELETE");
+    DELETE("DELETE"),
+    STATUS("STATUS");
 
     private final String text;
 

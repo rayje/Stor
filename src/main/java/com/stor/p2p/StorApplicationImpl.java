@@ -170,4 +170,15 @@ public class StorApplicationImpl implements StorApplication {
 
         return appResponse;
     }
+
+    @Override
+    public AppResponse getStatus() {
+        AppResponse<String> appResponse = new AppResponseImpl<>();
+
+        /*
+         * Add a printable version of the RoutingTable to the response.
+         */
+        appResponse.setResponse(node.getRoutingTable().printSelf());
+        return appResponse;
+    }
 }

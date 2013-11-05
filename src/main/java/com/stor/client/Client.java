@@ -3,6 +3,7 @@ package com.stor.client;
 import com.stor.commands.Command;
 import com.stor.commands.GetCommand;
 import com.stor.commands.PutCommand;
+import com.stor.commands.StatusCommand;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -14,76 +15,93 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import java.nio.file.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Stor P2P Project
- * @param host hostname or host IP address
- * @param port
- * @param command
- * @param PUTCMD "PUT"
- * @param GETCMD "GET"
- * @param NUMARGS number of arguments expected from the main() method
+ * The Client class is the implementation of the UI for
+ * the Stor Server.
+ *
+ * The Client accepts the following commands:
+ *      PUT: Puts a file into the P2P network.
+ *      GET: Performs a lookup of a given file id.
+ *      STATUS: Prints the status of the Stor server.
  */
-
-
 public class Client {
 
-    private final String host;
-    private final int port;
-    private Command command;
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 15080;
     private static final String PUTCMD = "PUT";
     private static final String GETCMD = "GET";
+    private static final String STATUS = "STATUS";
+    private static final List validCommands = Arrays.asList(new String[]{PUTCMD, GETCMD, STATUS});
 
-    private static final int NUMARGS = 2; //expected number of arguments
+    private static final Logger logger = Logger.getLogger(Client.class.getName());
 
-    public static void main(String[] args) throws Exception {
+    private Command command;
 
-        if (args.length != NUMARGS) QuitOnError("default");
-
-        final String host = "127.0.0.1";
-        final int port = 15080;
-        final String cmd = args[0].toUpperCase();
-        String fileName = args[1];
-
-        if (!cmd.equals(PUTCMD) && !cmd.equals(GETCMD)) {
-            QuitOnError("default");
+    public static void main(String[] args) {
+        if (args.length <= 0) {
+            quitOnError("default");
         }
 
-        if (cmd.equals(PUTCMD))
-        {
-            final File filePath = new File(fileName);
-            if (!filePath.exists()) QuitOnError("File does not exist!");
-            fileName = filePath.toString();
+        String cmd = args[0].toUpperCase();
+        String cmdArg = null;
 
-            if (!filePath.isAbsolute())
-            {
-                try {
-                    fileName = filePath.getCanonicalPath();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        if (args.length > 1) {
+            cmdArg = args[1];
+        }
+
+        if (!validCommands.contains(cmd)) {
+            System.err.println("INVALID CMD " + cmd);
+            quitOnError("default");
+        }
+
+        if (cmd.equals(PUTCMD)) {
+            try {
+                cmdArg = resolveFilename(cmdArg);
+            } catch (Exception e) {
+                e.printStackTrace();
+                quitOnError(e.getMessage());
             }
         }
 
+        System.out.println("Command accepted: " + cmd + " arg: " + cmdArg);
 
-        System.out.println("Command accepted: " + cmd + " file: " + fileName);
-        new Client(host, port, cmd, fileName).run();
-    }
-
-    public Client(String host, int port, String cmd, String fName) {
-        this.host = host;
-        this.port = port;
-
-        if (cmd.equals(PUTCMD)) {
-            this.command = new PutCommand(fName);
-        } else if (cmd.equals(GETCMD)) {
-            this.command = new GetCommand(fName);
+        try {
+            new Client(cmd, cmdArg).run();
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception thrown from Client", e);
+            e.printStackTrace();
         }
     }
 
+    /**
+     * A Client that represents the UI for the P2P server implementation.
+     *
+     * @param cmd The String command to run.
+     * @param cmdArg The argument associated with the cmd.
+     */
+    public Client(String cmd, String cmdArg) {
+        if (cmd.equals(PUTCMD)) {
+            this.command = new PutCommand(cmdArg);
+        } else if (cmd.equals(GETCMD)) {
+            this.command = new GetCommand(cmdArg);
+        } else if (cmd.equals(STATUS)) {
+            this.command = new StatusCommand();
+        }
+    }
+
+    /**
+     * Starts the client.
+     *
+     * @throws Exception If an error occurs while trying to execute the command.
+     */
     public void run() throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();
 
@@ -103,18 +121,55 @@ public class Client {
                         }
                     });
 
-            ChannelFuture f = b.connect(host, port).sync();
+            ChannelFuture f = b.connect(HOST, PORT).sync();
             f.channel().closeFuture().sync();
         } finally {
             group.shutdownGracefully();
         }
     }
 
-    // private helper - quit and print error message
-    private static void QuitOnError(String error) {
+    /**
+     * Tries to ensure the file being PUT into the P2P network exists
+     * and also tries to ensure the filename is an absolute path.
+     *
+     * @param cmdArg The argument provided with the PUT command.
+     * @return A String representation of the fully qualifies path to the file.
+     * @throws Exception If an error occurs while trying to get the path for the file.
+     */
+    private static String resolveFilename(String cmdArg) throws Exception {
+        final File filePath = new File(cmdArg);
+        String filename = cmdArg;
 
-        if (error.equals("default")) System.err.println("Usage: Client <PUT> <fileName> or <GET> <fileId>");
-        else System.err.println(error);
+        if (!filePath.exists()) {
+            quitOnError("File " + filePath.getAbsolutePath() + " does not exist!");
+        }
+
+        if (!filePath.isAbsolute()) {
+            try {
+                filename = filePath.getCanonicalPath();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Exception getting full path", e);
+                throw e;
+            }
+        }
+
+        return filename;
+    }
+
+    // private helper - quit and print error message
+    private static void quitOnError(String error) {
+        if (error.equals("default")) {
+            StringBuilder builder = new StringBuilder()
+                .append("Usage: Client <command> [options]\n")
+                .append("  Commands:\n")
+                .append("    PUT <filename>\n")
+                .append("    GET <fileId>\n")
+                .append("    STATUS\n");
+
+            System.err.println(builder.toString());
+        } else {
+            System.err.println(error);
+        }
 
         System.exit(1);
     }

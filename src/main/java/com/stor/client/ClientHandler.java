@@ -1,7 +1,10 @@
 package com.stor.client;
 
+
+import com.stor.client.result.ResultHandlerFactory;
 import com.stor.commands.Command;
 import com.stor.commands.CommandResult;
+import com.stor.commands.ResultHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -24,20 +27,28 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     public void channelRead(ChannelHandlerContext ctx, Object result) throws Exception {
-        logger.log(Level.INFO, "" + result);
+        logger.log(Level.INFO, "channelRead: " + command.getType());
 
-        if (result instanceof CommandResult) {
-            CommandResult commandResult = (CommandResult) result;
-            switch (command.getType()) {
-                case GET:
+        CommandResult commandResult = (CommandResult) result;
+        ResultHandler resultHandler = ResultHandlerFactory.getResultHandler(command.getType());
+
+        if (resultHandler != null) {
+            logger.log(Level.INFO, resultHandler.getClass().getName());
+
+            resultHandler.setCommand(command);
+            switch(commandResult.getResultType()) {
+                case SUCCESS:
+                    resultHandler.handleSuccess(commandResult);
                     break;
-                case PUT:
+                case FAILURE:
+                    resultHandler.handleFailure(commandResult);
                     break;
                 default:
-                    logger.warning("Unexpected Command: " + command);
+                    logger.warning(commandResult.getResultType() + " is not a recognized result type.");
+                    break;
             }
         } else {
-            logger.warning("Unknown response for a command from the server");
+            logger.warning("No handler configured for: " + command.getType());
         }
 
         ctx.close();

@@ -14,4 +14,10 @@ public interface StorApplication {
      * @return String - absolute file path (including name) of the retrieved file location
      */
     public AppResponse get(String fileId);
+
+    /**
+     * Return an AppResponse that contains the current status of the server.
+     * @return An instance of {@link AppResponse}
+     */
+    AppResponse getStatus();
 }

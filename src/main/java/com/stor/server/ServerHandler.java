@@ -29,7 +29,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(final ChannelHandlerContext ctx, Object command) throws Exception {
         AppResponse response;
 
-        switch (((Command) command).getType()) {
+        CommandType commandType = ((Command) command).getType();
+        switch (commandType) {
             case GET:
                 GetCommand getCommand = (GetCommand) command;
                 logger.log(Level.INFO, "Server received GET command" + getCommand);
@@ -39,6 +40,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                 PutCommand putCommand = (PutCommand) command;
                 logger.log(Level.INFO, "Server received PUT command" + putCommand);
                 response = application.put(putCommand.getFilePath());
+                break;
+            case STATUS:
+                StatusCommand statusCommand = (StatusCommand) command;
+                logger.log(Level.INFO, "Server received STATUS command" + statusCommand);
+                response = application.getStatus();
                 break;
             default:
                 response = new AppResponseImpl<Boolean>();

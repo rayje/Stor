@@ -15,7 +15,8 @@ package com.stor.commands;
 public enum ResultType {
 
     SUCCESS("SUCCESS"),
-    FAILURE("FAILURE");
+    FAILURE("FAILURE"),
+    STATUS("STATUS");
 
     private final String text;
 

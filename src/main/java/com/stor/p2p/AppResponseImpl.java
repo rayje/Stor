@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @see AppResponse
  */
 public class AppResponseImpl<T> implements AppResponse<T>, Serializable {
-   private String errorMessage;
+    private String errorMessage;
     private T response;
 
     @Override
