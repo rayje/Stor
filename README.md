@@ -68,6 +68,8 @@ The following is a list of options provided by the stor script:
         -h      Show this message
         -c      Start the client
         -s      Start the server
+        -k      Kill the Stor server
+        -x      Get the status of the Stor server
 
     SERVER OPTIONS:
         -p      The host address to be used by the Pastry server. This is required
