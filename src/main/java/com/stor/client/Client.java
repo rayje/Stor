@@ -71,7 +71,7 @@ public class Client {
             }
         }
 
-        System.out.println("Command accepted: " + cmd + " arg: " + cmdArg);
+        System.out.println("Command accepted: " + cmd + (cmdArg==null ? "" : " arg: " + cmdArg));
 
         try {
             new Client(cmd, cmdArg).run();
