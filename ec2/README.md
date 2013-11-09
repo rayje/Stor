@@ -14,6 +14,13 @@ Once NodeJs is installed, from the ec2 directory, you can run the following comm
 
     $ npm install
 
+Setup
+-----
+The only setup required is that you export the following environment variables:
+
+    $ export AWS_ACCESS_KEY_ID='AKID'
+    $ export AWS_SECRET_ACCESS_KEY='SECRET'
+
 Usage
 -----
 
