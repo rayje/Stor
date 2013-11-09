@@ -1,0 +1,159 @@
+#!/usr/bin/env node
+
+var AWS = require('aws-sdk');
+var commandLine = require('commander');
+
+AWS.config.update({region: 'us-west-2'});
+
+try {
+	var options = getCommandLineArguments();
+	var client = new EC2Client(options);
+
+	if (options.start) {
+		console.log('Starting instances:', options.start);
+
+		var instances = options.start.split(',');
+		if (instances.length === 0) {
+			console.log('No instance ids provided');
+			return options.outputHelp();	
+		}
+
+		client.startInstances(instances);
+		
+	} else if (options.stop) {
+		console.log('Stopping instances', options.stop);
+
+		var instances = options.stop.split(',');
+		if (instances.length === 0) {
+			console.log('No instance ids provided');
+			return options.outputHelp();	
+		}
+
+		client.stopInstances(instances);
+	} else if (options.launch) {
+		console.log('Creating ' + options.num + ' instance(s) from image ' + options.launch);
+
+		client.launchInstance(options.launch, options.num);
+	} else {
+		console.log('No recognized options were found');
+		options.outputHelp();
+	}
+
+
+	
+} catch (error) {
+	console.log('Unexpected exception', error);
+	console.log(error.stack);	
+}
+
+function getCommandLineArguments() {
+	commandLine
+		.version('0.0.1')
+		.description('A command line EC2 client')
+		.option('--start <instanceIds>', 'A comma delimited list of instance ids')
+		.option('--stop <instanceIds>', 'A comma delimited list of instance ids')
+		.option('--launch <imageId>', 'Which reporter to use for displaying the results')
+		.option('--name <instanceName>', 'A name to give to the instance being created. To be used with the --launch option')
+		.option('--num <numInstances>', 'The number of instances to laaunch. To be used with the --launch option', Number, 1)
+		.option('--size <sixe>', 'The size of the instance to laaunch (Default: t1.micro). To be used with the --launch option')
+		.parse(process.argv);
+
+	return commandLine;
+}
+
+function EC2Client(options) {
+
+	var ec2 = new AWS.EC2();
+
+	/**
+	 * Starts one or more instances.
+	 *
+	 * instanceIds: A array of instance ids as strings.
+	 */
+	this.startInstances = function(instanceIds) {
+		var params = {
+			InstanceIds: instanceIds
+		};
+
+		ec2.startInstances(params, function(err, data) {
+
+			if (err) {
+				console.log("Error starting instances", err);
+				return;
+			}
+
+			console.log(JSON.stringify(data));
+		});
+	};
+
+	/**
+	 * Stops one or more instances
+	 *
+	 * instanceIds: A array of instance ids as strings.
+	 */
+	this.stopInstances = function(instanceIds) {
+		var params = {
+			InstanceIds: instanceIds
+		};
+
+		ec2.stopInstances(params, function(err, data) {
+
+			if (err) {
+				console.log("Error stopping instances", err);
+				return;
+			}
+
+			console.log(JSON.stringify(data));
+		});
+	};
+
+	/**
+	 * Creates an instance from an existing AMI image.
+	 *
+	 * instances: The id of the AMI image as a string. 
+	 * name: The name to give to the instance. (Optional)
+	 * num: An integer representing the number of instances
+	 * 		to run based on the AMI instance id.
+	 * size: The size of the instance. (Default: t1.micro)
+	 */
+	this.launchInstance = function(imageId, num) {
+		var size;
+
+		if (!options.size) {
+			size = 't1.micro'
+		}
+
+		var params = {
+			ImageId: imageId,
+			InstanceType: size,
+			MinCount: num, 
+			MaxCount: num 
+		};
+
+		ec2.runInstances(params, function(err, data) {
+			if (err) {
+				console.log("Error creating instance", err);
+				return;
+			}
+
+			var instanceId = data.Instances[0].InstanceId;
+			console.log("Created instance", instanceId);
+
+			if (options.name) {
+				params = {
+					Resources: [instanceId], 
+					Tags: [{
+						Key: 'Name', 
+						Value: name
+					}]
+				};
+
+				ec2.createTags(params, function(err){
+					console.log("Tagging instance", err ? "failure" : "success");
+				});
+			}
+		});
+	};
+
+}
+

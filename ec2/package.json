@@ -1,0 +1,10 @@
+{
+    "name": "ec2-client",
+    "description": "An nodejs client for EC2.",
+    "version": "0.0.1",
+    "dependencies": {
+        "aws-sdk": ">= 1.5.0",
+        "node-uuid": ">= 1.4.1",
+        "commander": "~2.0.0"
+    }
+}
