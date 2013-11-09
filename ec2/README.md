@@ -47,7 +47,7 @@ To start an existing instance run the following command:
 
 To stop a running EC2 instance, run the following command:
 
-    $ ./ec2 --stop <instandeIds>
+    $ ./ec2 --stop <instanceIds>
 
 ```instanceIds```: A comma delimited list of instance ids
 
@@ -65,4 +65,4 @@ The launch command also takes some additional options:
 
 ```num```: The number of instances to create from the image (Default: 1).
 
-```size```: The size of them instance to create (Default: t1.micro).
+```size```: The size of the instance to create (Default: t1.micro).
