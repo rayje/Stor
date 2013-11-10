@@ -29,8 +29,8 @@ public class StorApplicationImpl implements StorApplication {
 
     private final Environment environment;
 
-    //replica count
-    private static final int REPLICA_COUNT = 5;
+    //replication factor
+    private static final int REPLICATION_FACTOR = 5;
     //10M disk storage
     private static final long MAX_DISK_STORAGE_CAPACITY = 10 * 1024 * 1024;
     //default disk storage location
@@ -64,7 +64,7 @@ public class StorApplicationImpl implements StorApplication {
         StorageManager storageManager = new StorageManagerImpl(messageIdFactory, diskStorage, inMemoryCache);
 
         //attach the Past application to the current node
-        pastApp = new PastImpl(node, storageManager, REPLICA_COUNT, "");
+        pastApp = new PastImpl(node, storageManager, REPLICATION_FACTOR, "");
 
         //boot node
         node.boot(bootAddress);
