@@ -25,6 +25,9 @@ import java.util.logging.Logger;
 
 public class StorApplicationImpl implements StorApplication {
     private static final Logger logger = Logger.getLogger(StorApplicationImpl.class.getName());
+    private static final Logger perfLogger = Logger.getLogger("performanceLog");
+
+    private final Environment environment;
 
     //replica count
     private static final int REPLICA_COUNT = 5;
@@ -38,9 +41,15 @@ public class StorApplicationImpl implements StorApplication {
     private Past pastApp;
     private PastryIdFactory messageIdFactory;
 
+    private long now() {
+        return this.environment.getTimeSource().currentTimeMillis();
+    }
 
     public StorApplicationImpl(int bindPort, InetSocketAddress bootAddress, final Environment environment) throws IOException, InterruptedException, JoinFailedException {
+        this.environment = environment;
+
         logger.info("StorApplicationImpl - begin initialization");
+        long begin = now();
 
         //generate a random node id
         PastryNodeFactory pastryNodeFactory = new SocketPastryNodeFactory(new RandomNodeIdFactory(environment), bindPort, environment);
@@ -59,6 +68,7 @@ public class StorApplicationImpl implements StorApplication {
 
         //boot node
         node.boot(bootAddress);
+        perfLogger.log(Level.INFO, "Boot Complete: {0} ms", now() - begin);
 
         // the node may require sending several messages to fully boot into the ring
         synchronized (node) {
@@ -74,6 +84,7 @@ public class StorApplicationImpl implements StorApplication {
         }
 
         logger.info("StorApplicationImpl - initialization complete");
+        perfLogger.log(Level.INFO, "Initialization completed: {0} ms", now() - begin);
     }
 
     public AppResponse put(String filePath) {
@@ -91,12 +102,17 @@ public class StorApplicationImpl implements StorApplication {
             //save message
             StorMessage message = new StorMessage(id, fileContent);
 
+            long begin = now();
             Continuation.ExternalContinuation<Boolean[], Exception> putContinuation = new Continuation.ExternalContinuation<>();
 
             //trigger past insert
             pastApp.insert(message, putContinuation);
 
             putContinuation.sleep();
+
+            long duration = now() - begin;
+            perfLogger.log(Level.INFO, "Insert Complete: {0}", duration);
+            perfLogger.log(Level.INFO, "INSERT: Content: {0} bytes, Duration: {1} ms", new Object[]{fileContent.length, duration});
 
             if (putContinuation.exceptionThrown()) {
                 throw putContinuation.getException();
@@ -126,11 +142,16 @@ public class StorApplicationImpl implements StorApplication {
              */
             Continuation.ExternalContinuation<PastContent, Exception> getContinuation = new Continuation.ExternalContinuation<>();
 
+            long begin = now();
+
             //trigger past lookup
             pastApp.lookup(contentId, getContinuation);
 
             //wait for the content to be ready.
             getContinuation.sleep();
+
+            long duration = now() - begin;
+            perfLogger.log(Level.INFO, "Lookup Complete: {0} ms", duration);
 
             /**
              * getContinuation sleep ended. check if the content is available and report back
@@ -157,6 +178,7 @@ public class StorApplicationImpl implements StorApplication {
                     throw new StorException("Failed to save file");
                 } else {
                     logger.info("Located content store in: " + newFilePath.toString());
+                    perfLogger.log(Level.INFO, "LOOKUP: Content: {0} bytes, Duration: {1} ms", new Object[]{message.getFileContent().length, duration});
                     appResponse.setResponse(newFilePath.toString());
                 }
             } else {
