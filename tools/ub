@@ -1,0 +1,3 @@
+#!/bin/sh
+
+ssh -i $HOME/$USER-os-key.pem ubuntu@$1

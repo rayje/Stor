@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. util.sh
+
+ips_file=$(get_ips)
+ips=$(cat $ips_file)
+
+for i in $ips; do
+	echo "====================================="
+	echo $i
+	echo "-------------------------------------"
+	ssh -i $HOME/$USER-os-key.pem ubuntu@$i 'find Stor_Age'
+	echo
+done
