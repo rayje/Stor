@@ -1,10 +1,12 @@
 #!/bin/sh
 
-. util.sh  
+. util.sh
 
 ips_file=$(get_ips)
 
-while read i
-do
-	ssh -i $HOME/$USER-os-key.pem 'uname -a'
-done < $ips_file
+ips=$(cat $ips_file)
+
+for i in $ips; do
+    echo $i
+    ssh -i $HOME/$USER-os-key.pem ubuntu@$i 'jps'
+done
