@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. util.sh  
+
+ips_file=$(get_ips)
+
+while read i
+do
+	ssh -i $HOME/$USER-os-key.pem 'uname -a'
+done < $ips_file
