@@ -29,12 +29,6 @@ public class StorApplicationImpl implements StorApplication {
 
     private final Environment environment;
 
-    //replication factor
-    private static final int REPLICATION_FACTOR = 5;
-    //10M disk storage
-    private static final long MAX_DISK_STORAGE_CAPACITY = 10 * 1024 * 1024;
-    //default disk storage location
-    private static final String DEFAULT_DISK_STORAGE_DIR = "Stor_Age/";
     //5M memory cache
     private static final int MAX_MEMORY_CACHE_CAPACITY = 5 * 1024 * 1024;
     private PastryNode node;
@@ -45,11 +39,23 @@ public class StorApplicationImpl implements StorApplication {
         return this.environment.getTimeSource().currentTimeMillis();
     }
 
-    public StorApplicationImpl(int bindPort, InetSocketAddress bootAddress, final Environment environment) throws IOException, InterruptedException, JoinFailedException {
-        this.environment = environment;
+    public StorApplicationImpl(int bindPort, InetSocketAddress bootAddress, final Environment environment) throws IOException, InterruptedException, JoinFailedException, StorException {
+        this.environment = environment; 
 
         logger.info("StorApplicationImpl - begin initialization");
         long begin = now();
+  
+  		// Storage Capacity
+ 		long storageCapacity = getStorageCapacity();
+ 		logger.info("Storage Capacity: " + storageCapacity);
+
+        // Get Storage Directory
+        String storageDir = System.getProperty("Stor.Age", "/tmp/stor");
+        logger.info("Storage Dir: " + storageDir);
+
+        // Get Replication Factor
+        int replicationFactor = Integer.parseInt(System.getProperty("Repl.Fact", "5"));
+        logger.info("Replication Factor: " + replicationFactor);
 
         //generate a random node id
         PastryNodeFactory pastryNodeFactory = new SocketPastryNodeFactory(new RandomNodeIdFactory(environment), bindPort, environment);
@@ -59,12 +65,12 @@ public class StorApplicationImpl implements StorApplication {
         messageIdFactory = new PastryIdFactory(node.getEnvironment());
 
         //storage
-        Storage diskStorage = new PersistentStorage(messageIdFactory, DEFAULT_DISK_STORAGE_DIR, MAX_DISK_STORAGE_CAPACITY, node.getEnvironment());
+        Storage diskStorage = new PersistentStorage(messageIdFactory, storageDir, storageCapacity, node.getEnvironment());
         Cache inMemoryCache = new LRUCache(new MemoryStorage(messageIdFactory), MAX_MEMORY_CACHE_CAPACITY, node.getEnvironment());
         StorageManager storageManager = new StorageManagerImpl(messageIdFactory, diskStorage, inMemoryCache);
 
         //attach the Past application to the current node
-        pastApp = new PastImpl(node, storageManager, REPLICATION_FACTOR, "");
+        pastApp = new PastImpl(node, storageManager, replicationFactor, "");
 
         //boot node
         node.boot(bootAddress);
@@ -85,6 +91,21 @@ public class StorApplicationImpl implements StorApplication {
 
         logger.info("StorApplicationImpl - initialization complete");
         perfLogger.log(Level.INFO, "Initialization completed: {0} ms", now() - begin);
+    }
+
+    private long getStorageCapacity() throws StorException {
+		// Get Storage Capacity
+        String storageCapacity = System.getProperty("Stor.Cap", "5");
+
+        long maxStorCap = 0;
+        try {
+        	maxStorCap = Long.valueOf(storageCapacity) * 1024 * 1024; 
+        } catch (NumberFormatException e) {
+        	logger.log(Level.WARNING, "", e);
+        	throw new StorException(e.getMessage());
+        }
+
+        return maxStorCap;
     }
 
     public AppResponse put(String filePath) {
