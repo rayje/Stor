@@ -59,26 +59,29 @@ with the Stor application. The stor scripts provides options for interaction wit
 The following is a list of options provided by the stor script:
 
     $ stor -h
-    usage: /usr/local/bin/stor options
+	usage: /usr/local/bin/stor options
 
-    This script is used to run the Stor server and client. The -c or -s option must
-    be provided to start either the server or the client.
+	This script is used to run the Stor server and client. The -c or -s option must
+	be provided to start either the server or the client.
 
-    OPTIONS:
-        -h      Show this message
-        -c      Start the client
-        -s      Start the server
-        -k      Kill the Stor server
-        -x      Get the status of the Stor server
+	OPTIONS:
+	    -h      Show this message
+	    -c      Start the client
+	    -s      Start the server
+	    -k      Kill the Stor server
+	    -x      Get the status of the Stor server
 
-    SERVER OPTIONS:
-        -p      The host address to be used by the Pastry server. This is required
-                when using the -s option. This can be either the hostname or ip address.
+	SERVER OPTIONS:
+	    -p      The host address to be used by the Pastry server. This is required
+	            when using the -s option. This can be either the hostname or ip address.
+	    -m 		The storage capacity for the server.
+	    -d 		The directory to be used for storage.
+	    -r 		The replication factor to be used.
 
-    CLIENT OPTIONS:
-        -a      The action to take (PUT, GET, DELETE).
-        -i      The file id to be used with a GET action. Required when using the GET action.
-        -f      The filename used for the PUT action. Required when using the PUT action.
+	CLIENT OPTIONS:
+	    -a      The action to take (PUT, GET, DELETE).
+	    -i      The file id to be used with a GET action. Required when using the GET action.
+	    -f      The filename used for the PUT action. Required when using the PUT action.
 
 ### Server
 

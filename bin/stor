@@ -21,8 +21,8 @@ OPTIONS:
 SERVER OPTIONS:
     -p      The host address to be used by the Pastry server. This is required
             when using the -s option. This can be either the hostname or ip address.
-    -m 		The storage capacity for the server.
-    -d 		The directory to be used for storage.
+    -m      The storage capacity for the server.
+    -d      The directory to be used for storage.
     -r 		The replication factor to be used.
 
 CLIENT OPTIONS:
