@@ -55,7 +55,7 @@ ACTION=
 CAPACITY=
 STORDIR=
 REPFACT=
-while getopts "p:f:a:i:schkx" opt; do
+while getopts "p:f:a:i:m:d:r:schkx" opt; do
   case $opt in
     h)
         usage
