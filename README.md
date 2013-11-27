@@ -91,6 +91,29 @@ To run the server run the following command:
 
 ```application_ring_host```: The hostname or ip address of the pastry ring server. To start a new application ring, specify the current server hostname.
 
+####Options
+The server also takes the following additional options:
+
+***Storage Capacity***
+
+Storage capacity can be set by providing the ```-m``` flag and capacity value in ```mb```.
+
+Default: ```5mb```
+
+
+***Storage Directory***
+
+The storage directory can be specified by providing the ```-d``` flag with the location of the storage directory.
+
+Default: ```/tmp/stor```
+
+
+***Replication Factor***
+
+The replication factor can be set by providing the ```-r``` flag with a replication factor as an integer.
+
+Default: ```5```
+
 ### Client
 
 The client takes a set of different options based on the action. When invoking the client, there are two main options,
